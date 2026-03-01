@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "WebFetch(domain:play.google.com)",
-      "WebFetch(domain:apps.apple.com)"
-    ]
-  }
-}

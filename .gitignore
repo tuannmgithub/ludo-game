@@ -3,7 +3,9 @@ dist/
 .next/
 .expo/
 *.env.local
+.env
 .turbo/
 *.log
 .DS_Store
 coverage/
+.claude/
