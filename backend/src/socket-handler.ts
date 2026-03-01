@@ -335,7 +335,8 @@ export function setupSocketHandlers(io: Server): void {
           // New player joining
           const result = joinRoom(upperCode, resolvedPlayerId!, resolvedUsername);
           if (!result.success) {
-            socket.emit('error', { message: result.error, code: 'JOIN_FAILED' });
+            const joinErr = result as { success: false; error: string };
+            socket.emit('error', { message: joinErr.error, code: 'JOIN_FAILED' });
             return;
           }
 
@@ -370,11 +371,12 @@ export function setupSocketHandlers(io: Server): void {
         const result = startGame(roomCode, playerId);
 
         if (!result.success) {
-          socket.emit('error', { message: result.error, code: 'START_FAILED' });
+          const startErr = result as { success: false; error: string };
+          socket.emit('error', { message: startErr.error, code: 'START_FAILED' });
           return;
         }
 
-        const room = result.room;
+        const room = (result as { success: true; room: Room }).room;
         io.to(roomCode).emit('game_started', { gameState: room.gameState });
 
         // Start first turn

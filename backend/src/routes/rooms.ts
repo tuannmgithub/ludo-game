@@ -146,7 +146,8 @@ router.post('/:code/join', (req: Request, res: Response) => {
 
     const result = joinRoom(code.toUpperCase(), resolved.playerId, username);
     if (!result.success) {
-      res.status(400).json({ error: result.error });
+      const err = result as { success: false; error: string };
+      res.status(400).json({ error: err.error });
       return;
     }
 
