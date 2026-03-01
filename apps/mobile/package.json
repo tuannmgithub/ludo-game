@@ -1,0 +1,35 @@
+{
+  "name": "@co-ca-ngua/mobile",
+  "version": "1.0.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "build:android": "eas build --platform android",
+    "build:ios": "eas build --platform ios"
+  },
+  "dependencies": {
+    "expo": "~51.0.0",
+    "expo-router": "~3.5.0",
+    "expo-status-bar": "~1.12.0",
+    "expo-font": "~12.0.10",
+    "expo-splash-screen": "~0.27.5",
+    "expo-constants": "~16.0.2",
+    "react": "18.2.0",
+    "react-native": "0.74.5",
+    "react-native-svg": "15.2.0",
+    "socket.io-client": "^4.7.0",
+    "zustand": "^4.5.0",
+    "@react-native-async-storage/async-storage": "1.23.1",
+    "nativewind": "^2.0.11",
+    "expo-haptics": "~13.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@types/react": "~18.2.79",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.0"
+  }
+}

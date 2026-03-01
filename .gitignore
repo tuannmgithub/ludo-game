@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.next/
+.expo/
+*.env.local
+.turbo/
+*.log
+.DS_Store
+coverage/
