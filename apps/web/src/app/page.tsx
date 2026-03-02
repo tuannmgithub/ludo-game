@@ -197,14 +197,15 @@ export default function HomePage() {
 
   const handleQuickPlay = async () => {
     setError(null);
-    // Find first available room
+    // Only join human-only rooms (no bots) — bot rooms require host to manually start,
+    // which would leave the joining player stuck waiting.
     const available = rooms.find(
-      (r) => r.status === 'waiting' && r.playerCount < r.maxPlayers
+      (r) => r.status === 'waiting' && r.playerCount < r.maxPlayers && !r.withBots
     );
     if (available) {
       await handleJoinRoom(available.roomCode);
     } else {
-      // Create a new room with bots
+      // Create a new room with bots (player will be host and auto-start)
       await handleCreateRoom(4, true);
     }
   };

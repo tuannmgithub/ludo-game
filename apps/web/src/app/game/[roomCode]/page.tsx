@@ -209,6 +209,7 @@ export default function GamePage() {
 
   const [showGameOver, setShowGameOver] = useState(false);
   const prevStatusRef = useRef<string | null>(null);
+  const autoStartedRef = useRef(false);
 
   const { rollDice, movePiece, startGame, leaveRoom } = useSocket(roomCode);
 
@@ -227,6 +228,19 @@ export default function GamePage() {
     }
     prevStatusRef.current = gameState.status;
   }, [gameState?.status]);
+
+  // Auto-start bot rooms: if I'm the host and the room has bots, start immediately
+  useEffect(() => {
+    if (autoStartedRef.current) return;
+    if (!gameState || !isConnected || !myColor) return;
+    if (gameState.status !== 'waiting') return;
+    const isHost = gameState.players[0]?.color === myColor;
+    const hasBots = gameState.players.some((p) => p.isBot);
+    if (isHost && hasBots) {
+      autoStartedRef.current = true;
+      startGame();
+    }
+  }, [gameState?.status, isConnected, myColor]);
 
   const handleRollDice = useCallback(() => {
     if (!canRollDice) return;
@@ -315,12 +329,11 @@ export default function GamePage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="h-screen flex flex-col overflow-hidden"
       style={{
         backgroundImage: "url('/assets/mainBoard/bg.jpg')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
       }}
     >
       <Notification message={notification} />
@@ -361,9 +374,9 @@ export default function GamePage() {
       </div>
 
       {/* Main layout */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 overflow-auto">
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4 p-4">
         {/* Left: Player panels */}
-        <div className="lg:w-48 flex flex-row lg:flex-col gap-2 flex-wrap lg:flex-nowrap">
+        <div className="lg:w-48 flex flex-row lg:flex-col gap-2 flex-wrap lg:flex-nowrap lg:overflow-y-auto">
           {gameState.players.map((player) => (
             <PlayerPanel
               key={player.id}
@@ -379,16 +392,18 @@ export default function GamePage() {
           ))}
         </div>
 
-        {/* Center: Game board */}
-        <div className="flex-1 flex items-center justify-center overflow-visible" style={{ paddingBottom: '40px' }}>
-          <GameBoard
-            gameState={gameState}
-            myColor={myColor}
-            onPieceClick={handleMovePiece}
-            lastCapturedPieceId={lastCapturedPieceId}
-            captureEvent={captureEvent}
-            exitEvent={exitEvent}
-          />
+        {/* Center: Game board — fills available space, aspect ratio preserved by SVG viewBox */}
+        <div className="flex-1 min-h-0 flex items-center justify-center">
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <GameBoard
+              gameState={gameState}
+              myColor={myColor}
+              onPieceClick={handleMovePiece}
+              lastCapturedPieceId={lastCapturedPieceId}
+              captureEvent={captureEvent}
+              exitEvent={exitEvent}
+            />
+          </div>
         </div>
 
         {/* Right: Controls */}
