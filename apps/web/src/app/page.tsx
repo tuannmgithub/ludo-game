@@ -197,15 +197,21 @@ export default function HomePage() {
 
   const handleQuickPlay = async () => {
     setError(null);
-    // Only join human-only rooms (no bots) — bot rooms require host to manually start,
-    // which would leave the joining player stuck waiting.
+    // Only join human-only rooms with no bots — bot rooms require the host to manually
+    // start, which would leave a joining player stuck waiting indefinitely.
+    // Also require at least the host to still be present (playerCount > 0).
     const available = rooms.find(
-      (r) => r.status === 'waiting' && r.playerCount < r.maxPlayers && !r.withBots
+      (r) =>
+        r.status === 'waiting' &&
+        r.playerCount < r.maxPlayers &&
+        r.withBots === false &&
+        r.playerCount > 0
     );
     if (available) {
       await handleJoinRoom(available.roomCode);
     } else {
-      // Create a new room with bots (player will be host and auto-start)
+      // No suitable room found — create a new room with bots.
+      // This player will be the host and the game will auto-start.
       await handleCreateRoom(4, true);
     }
   };

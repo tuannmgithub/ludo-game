@@ -240,7 +240,7 @@ export default function GamePage() {
       autoStartedRef.current = true;
       startGame();
     }
-  }, [gameState?.status, isConnected, myColor]);
+  }, [gameState?.status, gameState?.players, isConnected, myColor]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRollDice = useCallback(() => {
     if (!canRollDice) return;
