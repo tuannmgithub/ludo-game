@@ -133,71 +133,49 @@ export default function GameBoard({
         className="rounded-lg shadow-2xl"
         style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
       >
-        {/* Background */}
-        <rect width={BOARD_SIZE_PX} height={BOARD_SIZE_PX} fill="#e2e8f0" />
+        {/* Background image */}
+        <image
+          href="/assets/mainBoard/bg2.jpg"
+          x={0} y={0}
+          width={BOARD_SIZE_PX}
+          height={BOARD_SIZE_PX}
+          preserveAspectRatio="xMidYMid slice"
+        />
 
-        {/* Cross-arm background (slightly lighter) */}
-        {/* Left arm */}
-        <rect x={0} y={6 * CELL_SIZE} width={6 * CELL_SIZE} height={3 * CELL_SIZE} fill="#f1f5f9" />
-        {/* Right arm */}
-        <rect x={9 * CELL_SIZE} y={6 * CELL_SIZE} width={6 * CELL_SIZE} height={3 * CELL_SIZE} fill="#f1f5f9" />
-        {/* Top arm */}
-        <rect x={6 * CELL_SIZE} y={0} width={3 * CELL_SIZE} height={6 * CELL_SIZE} fill="#f1f5f9" />
-        {/* Bottom arm */}
-        <rect x={6 * CELL_SIZE} y={9 * CELL_SIZE} width={3 * CELL_SIZE} height={6 * CELL_SIZE} fill="#f1f5f9" />
-        {/* Center */}
-        <rect x={6 * CELL_SIZE} y={6 * CELL_SIZE} width={3 * CELL_SIZE} height={3 * CELL_SIZE} fill="#f1f5f9" />
+        {/* Dark overlay to make board elements readable */}
+        <rect width={BOARD_SIZE_PX} height={BOARD_SIZE_PX} fill="rgba(0,0,0,0.25)" />
 
         {/* === STABLE AREAS === */}
         {COLORS.map((color) => {
           const [bx, by, bw, bh] = STABLE_BOUNDS[color];
           return (
             <g key={`stable-${color}`}>
-              {/* 3D depth shadow offset */}
-              <rect
-                x={bx + 5}
-                y={by + 5}
-                width={bw}
-                height={bh}
-                fill={COLOR_HEX[color]}
-                opacity={0.2}
-                rx={6}
-              />
-              {/* Outer stable border */}
+              {/* Glass background */}
               <rect
                 x={bx}
                 y={by}
                 width={bw}
                 height={bh}
-                fill={COLOR_LIGHT[color]}
-                stroke={COLOR_HEX[color]}
-                strokeWidth={3}
-                rx={4}
-              />
-              {/* Inner stable circle area */}
-              <rect
-                x={bx + CELL_SIZE * 0.7}
-                y={by + CELL_SIZE * 0.7}
-                width={bw - CELL_SIZE * 1.4}
-                height={bh - CELL_SIZE * 1.4}
-                rx={8}
-                fill="white"
-                fillOpacity={0.6}
-                stroke={COLOR_HEX[color]}
-                strokeWidth={2}
-              />
-              {/* Color label */}
-              <text
-                x={bx + bw / 2}
-                y={by + bh / 2 + 24}
-                textAnchor="middle"
-                fontSize={11}
-                fontWeight="600"
                 fill={COLOR_HEX[color]}
-                opacity={0.7}
-              >
-                {color.toUpperCase()}
-              </text>
+                fillOpacity={0.18}
+                stroke={COLOR_HEX[color]}
+                strokeWidth={2.5}
+                strokeOpacity={0.7}
+                rx={6}
+              />
+              {/* Inner glow ring */}
+              <rect
+                x={bx + CELL_SIZE * 0.5}
+                y={by + CELL_SIZE * 0.5}
+                width={bw - CELL_SIZE}
+                height={bh - CELL_SIZE}
+                rx={10}
+                fill={COLOR_HEX[color]}
+                fillOpacity={0.12}
+                stroke={COLOR_HEX[color]}
+                strokeWidth={1.5}
+                strokeOpacity={0.5}
+              />
             </g>
           );
         })}
@@ -213,27 +191,46 @@ export default function GameBoard({
           else if (pos === 26) startColor = COLOR_LIGHT.yellow;
           else if (pos === 39) startColor = COLOR_LIGHT.green;
 
-          const half = CELL_SIZE / 2;
+          const half = CELL_SIZE / 2 - 1;
+          const fillColor = isStart && startColor ? startColor
+            : isSafe ? '#fde68a'
+            : 'white';
+          const fillOpacity = isStart ? 0.75 : isSafe ? 0.6 : 0.35;
           return (
             <g key={`track-${pos}`}>
+              {/* Tile shadow */}
+              <rect
+                x={tx - half + 2}
+                y={ty - half + 2}
+                width={half * 2}
+                height={half * 2}
+                rx={5}
+                fill="rgba(0,0,0,0.3)"
+              />
+              {/* Tile body */}
               <rect
                 x={tx - half}
                 y={ty - half}
-                width={CELL_SIZE}
-                height={CELL_SIZE}
-                fill={isStart && startColor ? startColor : isSafe ? '#fef9c3' : 'white'}
-                stroke={isStart ? (startColor ? '#888' : '#cbd5e1') : '#cbd5e1'}
-                strokeWidth={isStart ? 2 : 1}
-                className="track-square"
+                width={half * 2}
+                height={half * 2}
+                fill={fillColor}
+                fillOpacity={fillOpacity}
+                stroke={isStart ? COLOR_HEX[(['red','blue','yellow','green'] as PlayerColor[])[([0,13,26,39]).indexOf(pos)]] : 'rgba(255,255,255,0.5)'}
+                strokeWidth={isStart ? 2 : 0.8}
+                rx={5}
               />
-              {isSafe && !isStart && (
+              {/* Shine highlight */}
+              <rect
+                x={tx - half + 2}
+                y={ty - half + 2}
+                width={half * 2 - 4}
+                height={(half * 2 - 4) * 0.4}
+                fill="rgba(255,255,255,0.25)"
+                rx={3}
+              />
+              {(isSafe || isStart) && (
                 <StarShape x={tx} y={ty} size={9} />
               )}
-              {isStart && startColor && (
-                <StarShape x={tx} y={ty} size={9} />
-              )}
-              {/* Position number for debugging - very faint */}
-              {/* <text x={tx} y={ty+4} textAnchor="middle" fontSize={8} fill="#94a3b8">{pos}</text> */}
             </g>
           );
         })}
@@ -241,44 +238,50 @@ export default function GameBoard({
         {/* === HOME STRETCH LANES === */}
         {COLORS.map((color) =>
           HOME_COORDS[color].slice(0, 5).map(([hx, hy], idx) => {
-            const half = CELL_SIZE / 2;
+            const half = CELL_SIZE / 2 - 1;
             return (
-              <rect
-                key={`home-${color}-${idx}`}
-                x={hx - half}
-                y={hy - half}
-                width={CELL_SIZE}
-                height={CELL_SIZE}
-                fill={COLOR_LIGHT[color]}
-                stroke={COLOR_HEX[color]}
-                strokeWidth={1.5}
-              />
+              <g key={`home-${color}-${idx}`}>
+                <rect
+                  x={hx - half + 2}
+                  y={hy - half + 2}
+                  width={half * 2}
+                  height={half * 2}
+                  rx={5}
+                  fill="rgba(0,0,0,0.3)"
+                />
+                <rect
+                  x={hx - half}
+                  y={hy - half}
+                  width={half * 2}
+                  height={half * 2}
+                  fill={COLOR_HEX[color]}
+                  fillOpacity={0.45}
+                  stroke={COLOR_HEX[color]}
+                  strokeWidth={1.5}
+                  strokeOpacity={0.8}
+                  rx={5}
+                />
+                <rect
+                  x={hx - half + 2}
+                  y={hy - half + 2}
+                  width={half * 2 - 4}
+                  height={(half * 2 - 4) * 0.4}
+                  fill="rgba(255,255,255,0.3)"
+                  rx={3}
+                />
+              </g>
             );
           })
         )}
 
         {/* === CENTER GOAL AREA === */}
-        {/* The center 3x3 area (cols 6-8, rows 6-8) — draw a diamond */}
         <polygon
           points={`${7 * CELL_SIZE + CELL_SIZE / 2},${6 * CELL_SIZE} ${9 * CELL_SIZE},${7 * CELL_SIZE + CELL_SIZE / 2} ${7 * CELL_SIZE + CELL_SIZE / 2},${9 * CELL_SIZE} ${6 * CELL_SIZE},${7 * CELL_SIZE + CELL_SIZE / 2}`}
-          fill="#fbbf24"
-          stroke="#f59e0b"
+          fill="rgba(251,191,36,0.25)"
+          stroke="gold"
           strokeWidth={2}
-          opacity={0.9}
         />
-        {/* Goal star */}
         <StarShape x={7 * CELL_SIZE + CELL_SIZE / 2} y={7 * CELL_SIZE + CELL_SIZE / 2} size={22} />
-        {/* Center label */}
-        <text
-          x={7 * CELL_SIZE + CELL_SIZE / 2}
-          y={7 * CELL_SIZE + CELL_SIZE / 2 + 30}
-          textAnchor="middle"
-          fontSize={9}
-          fontWeight="bold"
-          fill="#92400e"
-        >
-          DICH
-        </text>
 
         {/* === PIECES IN STABLE === */}
         {COLORS.map((color) => {
@@ -471,10 +474,11 @@ export default function GameBoard({
           height: '22px',
           bottom: '-22px',
           left: 0,
-          background: 'linear-gradient(to bottom, #334155, #1e293b)',
-          borderRadius: '0 0 6px 6px',
+          background: 'linear-gradient(to bottom, #4c1d95, #2e1065)',
+          borderRadius: '0 0 8px 8px',
           transformOrigin: 'top',
           transform: 'rotateX(-90deg)',
+          boxShadow: '0 8px 20px rgba(139, 92, 246, 0.4)',
         }}
       />
       </div>
@@ -503,8 +507,9 @@ function PieceCircle({
   onClick,
   small = false,
 }: PieceCircleProps) {
-  const r = small ? 8 : 14;
-  const innerR = small ? 4 : 8;
+  const size = small ? 22 : 36;
+  const halfW = size / 2;
+  const halfH = size * 0.6; // horse image taller than wide
 
   return (
     <g
@@ -512,56 +517,43 @@ function PieceCircle({
       className={clsx(isValid && 'piece-valid', isCaptured && 'piece-capture')}
       style={{
         cursor: isValid ? 'pointer' : 'default',
-        // CSS translate drives smooth movement animation whenever x/y change
         transform: `translate(${x}px, ${y}px)`,
         transition: 'transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1)',
       }}
     >
-      {/* Outer glow for valid moves — rendered at origin since g is translated */}
+      {/* Pulsing glow ring for valid moves */}
       {isValid && (
         <circle
           cx={0}
-          cy={0}
-          r={r + 5}
+          cy={4}
+          r={halfW + 4}
           fill="none"
           stroke={COLOR_HEX[color]}
           strokeWidth={2.5}
-          opacity={0.6}
+          opacity={0.7}
         >
-          <animate
-            attributeName="r"
-            values={`${r + 3};${r + 8};${r + 3}`}
-            dur="1s"
-            repeatCount="indefinite"
-          />
-          <animate
-            attributeName="opacity"
-            values="0.8;0.3;0.8"
-            dur="1s"
-            repeatCount="indefinite"
-          />
+          <animate attributeName="r"       values={`${halfW + 2};${halfW + 9};${halfW + 2}`} dur="0.9s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.9;0.25;0.9" dur="0.9s" repeatCount="indefinite" />
         </circle>
       )}
 
-      {/* Drop shadow (3D elevation illusion) */}
-      <ellipse cx={2} cy={r * 0.6 + 4} rx={r * 0.85} ry={r * 0.3} fill="rgba(0,0,0,0.25)" />
+      {/* My-piece indicator ring */}
+      {isMyPiece && !small && (
+        <circle cx={0} cy={4} r={halfW + 1} fill="none" stroke="white" strokeWidth={1.5} strokeOpacity={0.6} strokeDasharray="3 2" />
+      )}
 
-      {/* Piece body — elevated look with bottom rim */}
-      <circle cx={0} cy={2} r={r} fill={COLOR_HEX[color]} opacity={0.55} />
-      <circle
-        cx={0}
-        cy={0}
-        r={r}
-        fill={COLOR_HEX[color]}
-        stroke="white"
-        strokeWidth={isMyPiece ? 2.5 : 1.5}
+      {/* Drop shadow */}
+      <ellipse cx={1} cy={halfH - 2} rx={halfW * 0.8} ry={halfW * 0.25} fill="rgba(0,0,0,0.45)" />
+
+      {/* Horse image */}
+      <image
+        href={`/assets/game/Horse/skin_1/${color}_horse.png`}
+        x={-halfW}
+        y={-halfH}
+        width={size}
+        height={size * 1.2}
+        preserveAspectRatio="xMidYMid meet"
       />
-
-      {/* Inner circle highlight */}
-      <circle cx={0} cy={0} r={innerR} fill="white" opacity={0.35} />
-
-      {/* Top sheen */}
-      <circle cx={-r * 0.28} cy={-r * 0.28} r={r * 0.28} fill="white" opacity={0.55} />
     </g>
   );
 }

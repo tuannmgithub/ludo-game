@@ -314,11 +314,19 @@ export default function GamePage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{
+        backgroundImage: "url('/assets/mainBoard/bg.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <Notification message={notification} />
 
       {/* Top bar */}
-      <div className="bg-slate-900 border-b border-slate-800 px-4 py-2 flex items-center justify-between">
+      <div className="bg-black/50 backdrop-blur-md border-b border-white/10 px-4 py-2 flex items-center justify-between">
         <button
           onClick={handleLeave}
           className="text-slate-400 hover:text-white transition-colors flex items-center gap-1.5 text-sm"
